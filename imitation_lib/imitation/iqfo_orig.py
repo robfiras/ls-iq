@@ -70,12 +70,3 @@ class IQfO_ORIG(IQ_SAC):
 
         self._iter += 1
 
-    def train_action_model(self, state, nstate, action):
-        state_nstate = np.concatenate([state, nstate], axis=1)
-        self._action_model.fit(state_nstate, action)
-
-        # log loss
-        action_pred = self._action_model(state_nstate)
-        loss = F.mse_loss(to_float_tensor(action_pred), to_float_tensor(action))
-        self._sw.add_scalar('Action Model Loss', loss,
-                            self._iter)
