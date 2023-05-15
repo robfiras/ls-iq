@@ -50,3 +50,41 @@ class BestAgentSaver:
     def save_agent(self,  agent, J):
         path = os.path.join(self.save_path, 'agent_J_%f.msh' % J)
         agent.save(path, full_save=True)
+
+
+def prepare_expert_data(data_path):
+    dataset = dict()
+
+    # load expert training data
+    expert_files = np.load(data_path)
+    dataset["states"] = expert_files["states"]
+    dataset["actions"] = expert_files["actions"]
+    dataset["episode_starts"] = expert_files["episode_starts"]
+
+    # maybe we have next action and next next state
+    try:
+        dataset["next_actions"] = expert_files["next_actions"]
+        dataset["next_next_states"] = expert_files["next_next_states"]
+    except KeyError as e:
+        print("Did not find next action or next next state.")
+
+    # maybe we have next states and dones in the dataset
+    try:
+        dataset["next_states"] = expert_files["next_states"]
+        dataset["absorbing"] = expert_files["absorbing"]
+    except KeyError as e:
+        print("Warning Dataset: %s" % e)
+
+    # maybe we have episode returns, if yes done
+    try:
+        dataset["episode_returns"] = expert_files["episode_returns"]
+        return dataset
+    except KeyError:
+        print("Warning Dataset: No episode returns. Falling back to step-based reward.")
+
+    # this has to work
+    try:
+        dataset["rewards"] = expert_files["rewards"]
+        return dataset
+    except KeyError:
+        raise KeyError("The dataset has neither an episode nor a step-based reward!")
