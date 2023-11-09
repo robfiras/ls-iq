@@ -1,7 +1,7 @@
 # LS-IQ: Implicit Reward Regularization for Inverse Reinforcement Learning
 This is the official code base of the paper [*LS-IQ: Implicit Reward Regularization for Inverse Reinforcement Learning*](https://arxiv.org/pdf/2303.00599.pdf), 
-which was presented at the eleventh International Conference on Learning Representations ([ICLR2023](https://iclr.cc/Conferences/2023))
-in Kigali Ruanda. Here you will find all implementations of the presented algorithms.
+which was presented at the eleventh International Conference on Learning Representations ([ICLR 2023](https://iclr.cc/Conferences/2023))
+in Kigali Ruanda. Here, we also provide all the baselines for the [LocoMuJoCo](https://github.com/robfiras/loco-mujoco) imitation learning benchmark [*LocoMuJoCo: A Comprehensive Imitation Learning Benchmark for Locomotion*](https://arxiv.org/pdf/2311.02496.pdf) presented at the Robot Learning workshop at [NeurIPS 2023](https://nips.cc/).
 
 ---
 ![Divergence_Minimization](img/Divergence_Minimization.gif)
