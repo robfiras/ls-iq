@@ -40,7 +40,7 @@ Then you can install this repo:
 pip install -e .
 ```
 
-### Download the Datasets
+### Download the Datasets [not needed for LocoMuJoCo]
 In order to run the examples and reproduce the results, you have to download the datasets used in our paper. To do so, you have to install `gdown`:
 
 ```shell
