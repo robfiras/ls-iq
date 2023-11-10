@@ -27,16 +27,10 @@ stabilize training as shown in our paper.
 
 ---
 ## Installation
-All agents are based on the [Mushroom-RL](https://github.com/MushroomRL/mushroom-rl) library, so you will have to install it with all its dependencies. Checkout the GitHub page to install all dependencies that can not be installed via pip.
-
-
-```shell
-pip install mushroom-rl[all]==1.9.0
-```
-
-Then you can install this repo:
+You can install this repo by cloning and then 
 
 ```shell
+cd ls-iq
 pip install -e .
 ```
 
