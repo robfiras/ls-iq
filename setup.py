@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-requires_list = ["mushroom_rl==1.9.0", "tensorboard", "experiment-launcher==1.2"]
+requires_list = ["mushroom_rl>=1.10.0", "tensorboard", "experiment-launcher"]
 
 setup(name='imitation_lib',
       version='0.1',
