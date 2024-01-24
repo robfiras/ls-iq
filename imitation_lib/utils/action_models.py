@@ -6,9 +6,9 @@ import torch.nn.functional as F
 from mushroom_rl.core import Serializable
 from mushroom_rl.approximators import Regressor
 from mushroom_rl.approximators.parametric import TorchApproximator
-from mushroom_rl.utils.torch import to_float_tensor
+from mushroom_rl.utils.torch import TorchUtils
 from mushroom_rl.utils.minibatches import minibatch_generator
-from mushroom_rl.utils.parameters import to_parameter
+from mushroom_rl.rl_utils.parameters import to_parameter
 
 from imitation_lib.utils.distributions import InverseGamma
 
@@ -51,10 +51,10 @@ class MAP_Learnable_Var(torch.nn.Module):
 
     def __init__(self, mu_0, lam, alpha, beta, use_cuda, use_arctanh=True):
         super().__init__()
-        self._mu_0 = to_float_tensor(mu_0, use_cuda)
-        self._lam = to_float_tensor(lam, use_cuda)
-        self._alpha = to_float_tensor(alpha, use_cuda)
-        self._beta = to_float_tensor(beta, use_cuda)
+        self._mu_0 = TorchUtils.to_float_tensor(mu_0, use_cuda)
+        self._lam = TorchUtils.to_float_tensor(lam, use_cuda)
+        self._alpha = TorchUtils.to_float_tensor(alpha, use_cuda)
+        self._beta = TorchUtils.to_float_tensor(beta, use_cuda)
         self._eps_log_prob = 1e-6
         self._use_arctanh = use_arctanh
         self._loss = torch.nn.GaussianNLLLoss()
@@ -100,10 +100,10 @@ class MAP(torch.nn.Module):
     def __init__(self, mu_0, lam, alpha, beta, use_cuda, use_arctanh=True):
         super().__init__()
 
-        self._mu_0 = to_float_tensor(mu_0, use_cuda)
-        self._lam = to_float_tensor(lam, use_cuda)
-        self._alpha = to_float_tensor(alpha, use_cuda)
-        self._beta = to_float_tensor(beta, use_cuda)
+        self._mu_0 = TorchUtils.to_float_tensor(mu_0, use_cuda)
+        self._lam = TorchUtils.to_float_tensor(lam, use_cuda)
+        self._alpha = TorchUtils.to_float_tensor(alpha, use_cuda)
+        self._beta = TorchUtils.to_float_tensor(beta, use_cuda)
         self._eps_log_prob = 1e-6
         self._use_arctanh = use_arctanh
         self._loss = torch.nn.GaussianNLLLoss()
@@ -128,7 +128,6 @@ class MAP(torch.nn.Module):
         targets_plcy = torch.clip(targets_plcy, -1+1e-6, 1-1e-6)
         targets_plcy = torch.arctanh(targets_plcy) if self._use_arctanh else targets_plcy
         L = torch.distributions.Normal(mu_plcy, log_sigma_plcy.exp()).log_prob(targets_plcy).sum(dim=1)
-        #L -= torch.log(1. - targets_plcy.pow(2) + self._eps_log_prob).sum(dim=1)
 
         # get the probability on the sigma²
         p_sigma = InverseGamma(self._alpha, self._beta).log_prob(torch.square(log_sigma_exp.exp())).sum(dim=1)
@@ -137,14 +136,6 @@ class MAP(torch.nn.Module):
         mu_0 = torch.tile(self._mu_0, (mu_exp.shape[0], 1))
         p_mu = torch.distributions.Normal(mu_0, log_sigma_exp.exp()/torch.sqrt(self._lam)).log_prob(mu_exp).sum(dim=1)
 
-        # # get the prior probability on the mu
-        # mu_0 = torch.tile(self._mu_0, (mu_exp.shape[0], 1))
-        # sigma_0 = torch.tile(self._log_sig_0.exp(), (mu_exp.shape[0], 1))
-        # p_mu = torch.distributions.Normal(mu_0, sigma_0).log_prob(mu_exp).sum(dim=1)
-        #
-        # # get the prior probability on the sigma
-        # p_sig = torch.distributions.Gamma(self._alpha, self._beta).log_prob(log_sigma_exp.exp()).sum(dim=1)
-
         return -(L.mean() + p_mu.mean() + p_sigma.mean())/3
 
     def forward(self, mu: torch.Tensor, log_sigma, targets: torch.Tensor):
@@ -152,7 +143,6 @@ class MAP(torch.nn.Module):
         # get the likelihood log_prob
         targets = torch.arctanh(targets) if self._use_arctanh else targets
         L = torch.distributions.Normal(mu, log_sigma.exp()).log_prob(targets).sum(dim=1)
-        #L -= torch.log(1. - targets_plcy.pow(2) + self._eps_log_prob).sum(dim=1)
 
         # get the probability on the sigma²
         p_sigma = InverseGamma(self._alpha, self._beta).log_prob(torch.square(log_sigma.exp())).sum(dim=1)
@@ -160,14 +150,6 @@ class MAP(torch.nn.Module):
         # get the probability on the mu
         mu_0 = torch.tile(self._mu_0, (mu.shape[0], 1))
         p_mu = torch.distributions.Normal(mu_0, log_sigma.exp()/torch.sqrt(self._lam)).log_prob(mu).sum(dim=1)
-
-        # # get the prior probability on the mu
-        # mu_0 = torch.tile(self._mu_0, (mu_exp.shape[0], 1))
-        # sigma_0 = torch.tile(self._log_sig_0.exp(), (mu_exp.shape[0], 1))
-        # p_mu = torch.distributions.Normal(mu_0, sigma_0).log_prob(mu_exp).sum(dim=1)
-        #
-        # # get the prior probability on the sigma
-        # p_sig = torch.distributions.Gamma(self._alpha, self._beta).log_prob(log_sigma_exp.exp()).sum(dim=1)
 
         return -(L.mean() + p_mu.mean() + p_sigma.mean())/3
 
@@ -185,15 +167,6 @@ class GCP(torch.nn.Module):
         kl = self.calc_KL_NIG(mus, lams, alphas, betas, mus_tar, lams_tar, alphas_tar, betas_tar)
 
         return torch.mean(kl)
-
-    # def calc_KL_NIG_wrong(self, mus, lams, alphas, betas, mus_tar, lams_tar, alphas_tar, betas_tar):
-    #     return 0.5 * (alphas_tar / betas_tar) * ((mus_tar - mus)**2) * lams\
-    #            + 0.5 * (lams / lams_tar)\
-    #            - 0.5 \
-    #            + alphas * torch.log(betas_tar / betas)\
-    #            - torch.lgamma(alphas_tar) + torch.lgamma(alphas)\
-    #            + (alphas_tar - alphas) * torch.digamma(alphas_tar) \
-    #            - (betas_tar - betas) * (alphas_tar / betas_tar)
 
     @staticmethod
     def calc_KL_NIG(mus, lams, alphas, betas, mus_tar, lams_tar, alphas_tar, betas_tar):

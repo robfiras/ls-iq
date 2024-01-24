@@ -1,15 +1,11 @@
 import torch
-import torch.nn.functional as F
 import numpy as np
-from mushroom_rl.approximators import Regressor
-from mushroom_rl.approximators.parametric import TorchApproximator
 from imitation_lib.imitation.iq_sac import IQ_SAC
 from mushroom_rl.utils.minibatches import minibatch_generator
-from mushroom_rl.utils.torch import to_float_tensor
+from mushroom_rl.utils.torch import TorchUtils
 
 
 class IQfO_ORIG(IQ_SAC):
-
 
     def fit(self, dataset):
 
@@ -34,10 +30,10 @@ class IQfO_ORIG(IQ_SAC):
                 demo_act = demo_act.detach().numpy()
 
             # prepare data for IQ update
-            input_states = to_float_tensor(np.concatenate([state, demo_obs.astype(np.float32)]))
-            input_actions = to_float_tensor(np.concatenate([action, demo_act.astype(np.float32)]))
-            input_n_states = to_float_tensor(np.concatenate([next_state, demo_nobs.astype(np.float32)]))
-            input_absorbing = to_float_tensor(np.concatenate([absorbing, demo_absorbing.astype(np.float32)]))
+            input_states = TorchUtils.to_float_tensor(np.concatenate([state, demo_obs.astype(np.float32)]))
+            input_actions = TorchUtils.to_float_tensor(np.concatenate([action, demo_act.astype(np.float32)]))
+            input_n_states = TorchUtils.to_float_tensor(np.concatenate([next_state, demo_nobs.astype(np.float32)]))
+            input_absorbing = TorchUtils.to_float_tensor(np.concatenate([absorbing, demo_absorbing.astype(np.float32)]))
             is_expert = torch.concat([torch.zeros(len(state), dtype=torch.bool),
                                       torch.ones(len(state), dtype=torch.bool)])
             # make IQ update

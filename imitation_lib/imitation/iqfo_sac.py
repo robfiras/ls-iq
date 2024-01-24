@@ -1,19 +1,12 @@
 import torch
 import torch.nn.functional as F
 import numpy as np
-from copy import deepcopy
 
-from mushroom_rl.core import Serializable
-from mushroom_rl.approximators import Regressor
-from mushroom_rl.approximators.parametric import TorchApproximator
 from imitation_lib.imitation.iq_sac import IQ_SAC
 from mushroom_rl.utils.minibatches import minibatch_generator
-from mushroom_rl.utils.torch import to_float_tensor
-from mushroom_rl.utils.parameters import to_parameter
+from mushroom_rl.utils.torch import TorchUtils
 from imitation_lib.utils.action_models import GaussianInvActionModel, LearnableVarGaussianInvActionModel,\
     GCPActionModel, KLGCPActionModel, KLGaussianInvActionModel
-
-from imitation_lib.utils.distributions import InverseGamma
 
 
 class IQfO_SAC(IQ_SAC):
@@ -83,8 +76,8 @@ class IQfO_SAC(IQ_SAC):
             # predict the actions for our expert dataset
             demo_obs_act = demo_obs.astype(np.float32)[:, self._state_mask]
             demo_nobs_act = demo_nobs.astype(np.float32)[:, self._state_mask]
-            demo_act = self._action_model.draw_action(to_float_tensor(demo_obs_act),
-                                                      to_float_tensor(demo_nobs_act))
+            demo_act = self._action_model.draw_action(TorchUtils.to_float_tensor(demo_obs_act),
+                                                      TorchUtils.to_float_tensor(demo_nobs_act))
 
             if self._add_noise_to_obs:
                 assert self.ext_normalizer_action_model is not None, "Normalizer is needed to be defined."

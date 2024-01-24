@@ -4,8 +4,6 @@ import torch.nn as nn
 from torch.nn import ModuleList
 import torch.nn.functional as F
 
-from mushroom_rl.utils.preprocessors import RunningStandardization
-
 
 class BiasedTanh(torch.nn.Module):
 

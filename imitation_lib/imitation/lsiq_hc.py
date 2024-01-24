@@ -1,13 +1,8 @@
-from copy import deepcopy
 import torch
 import numpy as np
 from .lsiq_h import LSIQ_H
 import torch.nn.functional as F
-from mushroom_rl.utils.parameters import to_parameter
-from mushroom_rl.approximators import Regressor
-from mushroom_rl.approximators.parametric import TorchApproximator
-
-from mushroom_rl.utils.torch import to_float_tensor
+from mushroom_rl.rl_utils.parameters import to_parameter
 
 
 class LSIQ_HC(LSIQ_H):

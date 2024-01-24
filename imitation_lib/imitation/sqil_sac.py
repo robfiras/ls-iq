@@ -1,7 +1,7 @@
 import numpy as np
 import torch
 from .iq_sac import IQ_SAC
-from mushroom_rl.utils.torch import to_float_tensor
+from mushroom_rl.utils.torch import TorchUtils
 
 
 class SQIL(IQ_SAC):
@@ -65,7 +65,7 @@ class SQIL(IQ_SAC):
         """
         This function overrides the iq-loss and replaces it with the sqil loss.
         """
-        gamma = to_float_tensor(self.mdp_info.gamma).cuda() if self._use_cuda else to_float_tensor(self.mdp_info.gamma)
+        gamma = TorchUtils.to_float_tensor(self.mdp_info.gamma).cuda() if self._use_cuda else TorchUtils.to_float_tensor(self.mdp_info.gamma)
         absorbing = torch.tensor(absorbing).cuda() if self._use_cuda else absorbing
         current_Q = self._critic_approximator(obs, act, output_tensor=True)
         if not self._use_target:

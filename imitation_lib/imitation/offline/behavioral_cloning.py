@@ -4,7 +4,7 @@ from torch.nn import GaussianNLLLoss
 import torch.nn.functional as F
 from mushroom_rl.core import Agent
 from mushroom_rl.approximators import Regressor
-from mushroom_rl.utils.torch import to_float_tensor
+from mushroom_rl.utils.torch import TorchUtils
 from mushroom_rl.utils.minibatches import minibatch_generator
 from mushroom_rl.approximators.parametric import TorchApproximator
 from imitation_lib.imitation.iq_sac import IQ_Learn_Policy
@@ -55,10 +55,10 @@ class BehavioralCloning(Agent):
                                                                  self._demonstrations["absorbing"]))
 
             # prepare tensors
-            states = to_float_tensor(demo_obs, self._use_cuda) \
-                if self._use_cuda else to_float_tensor(demo_obs)
-            target_actions = to_float_tensor(demo_act, self._use_cuda) \
-                if self._use_cuda else to_float_tensor(demo_act)
+            states = TorchUtils.to_float_tensor(demo_obs, self._use_cuda) \
+                if self._use_cuda else TorchUtils.to_float_tensor(demo_obs)
+            target_actions = TorchUtils.to_float_tensor(demo_act, self._use_cuda) \
+                if self._use_cuda else TorchUtils.to_float_tensor(demo_act)
 
             # do unsquashing of target actions
             central, delta = self.policy.get_central_delta()

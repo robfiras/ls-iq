@@ -1,19 +1,12 @@
 import torch
 import torch.nn.functional as F
 import numpy as np
-from copy import deepcopy
 
-from mushroom_rl.core import Serializable
-from mushroom_rl.approximators import Regressor
-from mushroom_rl.approximators.parametric import TorchApproximator
 from imitation_lib.imitation.lsiq import LSIQ
 from mushroom_rl.utils.minibatches import minibatch_generator
-from mushroom_rl.utils.torch import to_float_tensor
-from mushroom_rl.utils.parameters import to_parameter
+from mushroom_rl.utils.torch import TorchUtils
 from imitation_lib.utils.action_models import GaussianInvActionModel, LearnableVarGaussianInvActionModel,\
     GCPActionModel, KLGCPActionModel, KLGaussianInvActionModel
-
-from imitation_lib.utils.distributions import InverseGamma
 
 
 class LSIQfO(LSIQ):
@@ -83,8 +76,8 @@ class LSIQfO(LSIQ):
             # predict the actions for our expert dataset
             demo_obs_act = demo_obs.astype(np.float32)[:, self._state_mask]
             demo_nobs_act = demo_nobs.astype(np.float32)[:, self._state_mask]
-            demo_act = self._action_model.draw_action(to_float_tensor(demo_obs_act),
-                                                      to_float_tensor(demo_nobs_act))
+            demo_act = self._action_model.draw_action(TorchUtils.to_float_tensor(demo_obs_act),
+                                                      TorchUtils.to_float_tensor(demo_nobs_act))
 
             # clip predicted action to action range
             demo_act = np.clip(demo_act, self.mdp_info.action_space.low, self.mdp_info.action_space.high)
@@ -107,12 +100,12 @@ class LSIQfO(LSIQ):
                                             mixing_coef=self._interpolation_coef)
 
             # prepare data for IQ update
-            input_states = to_float_tensor(np.concatenate([state,
+            input_states = TorchUtils.to_float_tensor(np.concatenate([state,
                                                            demo_obs.astype(np.float32)[:, self._state_mask]]))
-            input_actions = to_float_tensor(np.concatenate([action, demo_act.astype(np.float32)]))
-            input_n_states = to_float_tensor(np.concatenate([next_state,
+            input_actions = TorchUtils.to_float_tensor(np.concatenate([action, demo_act.astype(np.float32)]))
+            input_n_states = TorchUtils.to_float_tensor(np.concatenate([next_state,
                                                              demo_nobs.astype(np.float32)[:, self._state_mask]]))
-            input_absorbing = to_float_tensor(np.concatenate([absorbing, demo_absorbing.astype(np.float32)]))
+            input_absorbing = TorchUtils.to_float_tensor(np.concatenate([absorbing, demo_absorbing.astype(np.float32)]))
             is_expert = torch.concat([torch.zeros(len(state), dtype=torch.bool),
                                       torch.ones(len(state), dtype=torch.bool)])
 
@@ -152,7 +145,7 @@ class LSIQfO(LSIQ):
 
             # make eval before training
             action_pred = self._action_model(state_nstate_val)
-            loss = F.mse_loss(to_float_tensor(action_pred), to_float_tensor(action_val))
+            loss = F.mse_loss(TorchUtils.to_float_tensor(action_pred), to_float_tensor(action_val))
             self._sw.add_scalar('Action-Model/Loss', loss, self._iter)
             print("Action Model Validation Loss before training: ", loss)
             action_pred = self._action_model(state_nstate_train)

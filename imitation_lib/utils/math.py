@@ -1,11 +1,9 @@
 from typing import Optional
-import numpy as np
+
 import torch
 import torch.nn.functional as F
-from mushroom_rl.utils.angles import euler_to_quat
 
-
-from mushroom_rl.utils.torch import to_float_tensor
+from mushroom_rl.utils.torch import TorchUtils
 
 
 class GailDiscriminatorLoss(torch.nn.modules.BCEWithLogitsLoss):
@@ -38,10 +36,12 @@ class GailDiscriminatorLoss(torch.nn.modules.BCEWithLogitsLoss):
 
 class VDBLoss(GailDiscriminatorLoss):
 
-    def __init__(self, info_constraint, lr_beta, use_bernoulli_ent=False, entcoeff=1e-3, weight: Optional[torch.Tensor] = None, size_average=None, reduce=None, reduction: str = 'mean',
-                 pos_weight: Optional[torch.Tensor] = None) -> None:
+    def __init__(self, info_constraint, lr_beta, use_bernoulli_ent=False, entcoeff=0.0,
+                 weight: Optional[torch.Tensor] = None, size_average=None, reduce=None,
+                 reduction: str = 'mean', pos_weight: Optional[torch.Tensor] = None) -> None:
 
         # call base constructor
+        assert entcoeff == 0.0, "Entropy regularization in Vail not supported."
         super().__init__(entcoeff, weight, size_average, reduce, reduction, pos_weight)
 
         self._use_bernoulli_ent = use_bernoulli_ent
@@ -90,11 +90,11 @@ def to_float_tensors(inputs):
     """ Takes a list or tuple of of numpy arrays and converts them to a list of torch tensors. If only an array is
         provided, it returns a torch tensor."""
     if type(inputs) is not tuple and type(inputs) is not list:
-        return to_float_tensor(inputs)
+        return TorchUtils.to_float_tensor(inputs)
     else:
         out = []
         for elem in inputs:
-            out.append(to_float_tensor(elem))
+            out.append(TorchUtils.to_float_tensor(elem))
         return out
 
 

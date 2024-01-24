@@ -6,7 +6,7 @@ import torch.nn.functional as F
 from mushroom_rl.approximators import Regressor
 from mushroom_rl.approximators.parametric import TorchApproximator
 
-from mushroom_rl.utils.torch import to_float_tensor
+from mushroom_rl.utils.torch import TorchUtils
 
 
 class LSIQ_H(LSIQ):
@@ -38,7 +38,7 @@ class LSIQ_H(LSIQ):
         loss_term1, loss_term2, chi2_loss = super()._lossQ_iq_like(obs, act, next_obs, absorbing, is_expert)
 
         # update the H function
-        gamma = to_float_tensor(self.mdp_info.gamma).cuda() if self._use_cuda else to_float_tensor(self.mdp_info.gamma)
+        gamma = TorchUtils.to_float_tensor(self.mdp_info.gamma).cuda() if self._use_cuda else TorchUtils.to_float_tensor(self.mdp_info.gamma)
         self.update_H_function(obs, act, next_obs, absorbing, gamma.detach(), is_expert)
 
         return loss_term1, loss_term2, chi2_loss
@@ -49,7 +49,7 @@ class LSIQ_H(LSIQ):
         loss_term1, loss_term2, chi2_loss = super(LSIQ_H, self)._lossQ_sqil_like(obs, act, next_obs, absorbing, is_expert)
         
         # update the H function
-        gamma = to_float_tensor(self.mdp_info.gamma).cuda() if self._use_cuda else to_float_tensor(self.mdp_info.gamma)
+        gamma = TorchUtils.to_float_tensor(self.mdp_info.gamma).cuda() if self._use_cuda else TorchUtils.to_float_tensor(self.mdp_info.gamma)
         self.update_H_function(obs, act, next_obs, absorbing, gamma.detach(), is_expert)
 
         return loss_term1, loss_term2, chi2_loss

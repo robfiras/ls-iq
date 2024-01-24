@@ -1,9 +1,5 @@
 from copy import deepcopy
 
-import torch
-import torch.nn.functional as F
-import numpy as np
-
 from imitation_lib.imitation import GAIL_TRPO
 from imitation_lib.utils import to_float_tensors
 

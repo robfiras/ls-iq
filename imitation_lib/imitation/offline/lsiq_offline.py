@@ -2,7 +2,7 @@ import torch
 from torch.functional import F
 import numpy as np
 from mushroom_rl.utils.minibatches import minibatch_generator
-from mushroom_rl.utils.torch import to_float_tensor
+from mushroom_rl.utils.torch import TorchUtils
 from imitation_lib.imitation.lsiq import LSIQ
 
 
@@ -35,10 +35,10 @@ class LSIQ_Offline(LSIQ):
                                                                  self._demonstrations["absorbing"]))
 
             # prepare data for IQ update
-            input_states = to_float_tensor(demo_obs.astype(np.float32)[:, self._state_mask], self._use_cuda)
-            input_actions = to_float_tensor(demo_act.astype(np.float32), self._use_cuda)
-            input_n_states = to_float_tensor(demo_nobs.astype(np.float32)[:, self._state_mask], self._use_cuda)
-            input_absorbing = to_float_tensor(demo_absorbing.astype(np.float32), self._use_cuda)
+            input_states = TorchUtils.to_float_tensor(demo_obs.astype(np.float32)[:, self._state_mask], self._use_cuda)
+            input_actions = TorchUtils.to_float_tensor(demo_act.astype(np.float32), self._use_cuda)
+            input_n_states = TorchUtils.to_float_tensor(demo_nobs.astype(np.float32)[:, self._state_mask], self._use_cuda)
+            input_absorbing = TorchUtils.to_float_tensor(demo_absorbing.astype(np.float32), self._use_cuda)
             is_expert = torch.ones(len(demo_obs), dtype=torch.bool).cuda() if self._use_cuda else torch.ones(len(demo_obs), dtype=torch.bool)
 
             # make IQ update
@@ -50,7 +50,7 @@ class LSIQ_Offline(LSIQ):
     def _lossQ(self, obs, act, next_obs, absorbing, is_expert):
 
         # Calculate 1st term of loss: -E_(ρ_expert)[Q(s, a) - γV(s')]
-        gamma = to_float_tensor(self.mdp_info.gamma).cuda() if self._use_cuda else to_float_tensor(self.mdp_info.gamma)
+        gamma = TorchUtils.to_float_tensor(self.mdp_info.gamma).cuda() if self._use_cuda else to_float_tensor(self.mdp_info.gamma)
         absorbing = torch.tensor(absorbing).cuda() if self._use_cuda else absorbing
         current_Q = self._critic_approximator(obs, act, output_tensor=True)
         if not self._use_target:

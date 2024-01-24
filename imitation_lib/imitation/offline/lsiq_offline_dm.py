@@ -3,7 +3,7 @@ import torch
 from torch.functional import F
 import numpy as np
 from mushroom_rl.utils.minibatches import minibatch_generator
-from mushroom_rl.utils.torch import to_float_tensor
+from mushroom_rl.utils.torch import TorchUtils
 from mushroom_rl.approximators import Regressor
 from mushroom_rl.approximators.parametric import TorchApproximator
 from imitation_lib.imitation.lsiq import LSIQ
@@ -71,9 +71,9 @@ class LSIQ_Offline_DM(LSIQ):
                                                                                      self._demonstrations["absorbing"]))
 
             # prepare data for IQ update
-            input_states = to_float_tensor(np.concatenate([state, demo_obs.astype(np.float32)[:, self._state_mask]]))
-            input_actions = to_float_tensor(np.concatenate([action, demo_act.astype(np.float32)]))
-            input_n_states = to_float_tensor(np.concatenate([next_state,
+            input_states = TorchUtils.to_float_tensor(np.concatenate([state, demo_obs.astype(np.float32)[:, self._state_mask]]))
+            input_actions = TorchUtils.to_float_tensor(np.concatenate([action, demo_act.astype(np.float32)]))
+            input_n_states = TorchUtils.to_float_tensor(np.concatenate([next_state,
                                                              demo_nobs.astype(np.float32)[:, self._state_mask]]))
             input_absorbing = to_float_tensor(np.concatenate([absorbing, demo_absorbing.astype(np.float32)]))
             is_expert = torch.concat([torch.zeros(len(state), dtype=torch.bool),

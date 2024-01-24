@@ -4,7 +4,7 @@ import numpy as np
 
 from imitation_lib.imitation.lsiq_hc import LSIQ_HC
 from mushroom_rl.utils.minibatches import minibatch_generator
-from mushroom_rl.utils.torch import to_float_tensor
+from mushroom_rl.utils.torch import TorchUtils
 from imitation_lib.utils.action_models import GaussianInvActionModel, LearnableVarGaussianInvActionModel,\
     GCPActionModel, KLGCPActionModel, KLGaussianInvActionModel
 
@@ -76,8 +76,8 @@ class LSIQfO_HC(LSIQ_HC):
             # predict the actions for our expert dataset
             demo_obs_act = demo_obs.astype(np.float32)[:, self._state_mask]
             demo_nobs_act = demo_nobs.astype(np.float32)[:, self._state_mask]
-            demo_act = self._action_model.draw_action(to_float_tensor(demo_obs_act),
-                                                      to_float_tensor(demo_nobs_act))
+            demo_act = self._action_model.draw_action(TorchUtils.to_float_tensor(demo_obs_act),
+                                                      TorchUtils.to_float_tensor(demo_nobs_act))
 
             if self._add_noise_to_obs:
                 assert self.ext_normalizer_action_model is not None, "Normalizer is needed to be defined."
@@ -97,12 +97,12 @@ class LSIQfO_HC(LSIQ_HC):
                                             mixing_coef=self._interpolation_coef)
 
             # prepare data for IQ update
-            input_states = to_float_tensor(np.concatenate([state,
+            input_states = TorchUtils.to_float_tensor(np.concatenate([state,
                                                            demo_obs.astype(np.float32)[:, self._state_mask]]))
-            input_actions = to_float_tensor(np.concatenate([action, demo_act.astype(np.float32)]))
-            input_n_states = to_float_tensor(np.concatenate([next_state,
+            input_actions = TorchUtils.to_float_tensor(np.concatenate([action, demo_act.astype(np.float32)]))
+            input_n_states = TorchUtils.to_float_tensor(np.concatenate([next_state,
                                                              demo_nobs.astype(np.float32)[:, self._state_mask]]))
-            input_absorbing = to_float_tensor(np.concatenate([absorbing, demo_absorbing.astype(np.float32)]))
+            input_absorbing = TorchUtils.to_float_tensor(np.concatenate([absorbing, demo_absorbing.astype(np.float32)]))
             is_expert = torch.concat([torch.zeros(len(state), dtype=torch.bool),
                                       torch.ones(len(state), dtype=torch.bool)])
 

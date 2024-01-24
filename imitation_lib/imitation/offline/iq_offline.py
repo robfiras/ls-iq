@@ -1,7 +1,7 @@
 import torch
 import numpy as np
 from mushroom_rl.utils.minibatches import minibatch_generator
-from mushroom_rl.utils.torch import to_float_tensor
+from mushroom_rl.utils.torch import TorchUtils
 from imitation_lib.imitation.iq_sac import IQ_SAC
 
 
@@ -40,10 +40,10 @@ class IQ_Offline(IQ_SAC):
                                                                  self._demonstrations["absorbing"]))
 
             # prepare data for IQ update
-            input_states = to_float_tensor(demo_obs.astype(np.float32)[:, self._state_mask])
-            input_actions = to_float_tensor(demo_act.astype(np.float32))
-            input_n_states = to_float_tensor(demo_nobs.astype(np.float32)[:, self._state_mask])
-            input_absorbing = to_float_tensor(demo_absorbing.astype(np.float32))
+            input_states = TorchUtils.to_float_tensor(demo_obs.astype(np.float32)[:, self._state_mask])
+            input_actions = TorchUtils.to_float_tensor(demo_act.astype(np.float32))
+            input_n_states = TorchUtils.to_float_tensor(demo_nobs.astype(np.float32)[:, self._state_mask])
+            input_absorbing = TorchUtils.to_float_tensor(demo_absorbing.astype(np.float32))
             is_expert = torch.ones(len(demo_obs), dtype=torch.bool)
 
             # make IQ update
@@ -58,7 +58,7 @@ class IQ_Offline(IQ_SAC):
         https://github.com/Div99/IQ-Learn
         """
         # Calculate 1st term of loss: -E_(ρ_expert)[Q(s, a) - γV(s')]
-        gamma = to_float_tensor(self.mdp_info.gamma).cuda() if self._use_cuda else to_float_tensor(self.mdp_info.gamma)
+        gamma = TorchUtils.to_float_tensor(self.mdp_info.gamma).cuda() if self._use_cuda else TorchUtils.to_float_tensor(self.mdp_info.gamma)
         absorbing = torch.tensor(absorbing).cuda() if self._use_cuda else absorbing
         current_Q = self._critic_approximator(obs, act, output_tensor=True)
         if not self._use_target:

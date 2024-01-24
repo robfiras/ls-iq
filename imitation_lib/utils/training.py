@@ -2,8 +2,6 @@ import os
 from copy import deepcopy
 import numpy as np
 
-from mushroom_rl.utils.dataset import compute_J, parse_dataset
-
 
 class BestAgentSaver:
 

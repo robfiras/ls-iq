@@ -6,10 +6,10 @@ import torch.optim as optim
 import torch.nn.functional as F
 from mushroom_rl.approximators import Regressor
 from mushroom_rl.approximators.parametric import TorchApproximator
-from mushroom_rl.utils.replay_memory import ReplayMemory
+from mushroom_rl.rl_utils.replay_memory import ReplayMemory
 from mushroom_rl.utils.minibatches import minibatch_generator
-from mushroom_rl.utils.torch import to_float_tensor
-from mushroom_rl.utils.parameters import to_parameter
+from mushroom_rl.utils.torch import TorchUtils
+from mushroom_rl.rl_utils.parameters import to_parameter
 
 from mushroom_rl.algorithms.actor_critic.deep_actor_critic import DeepAC
 from mushroom_rl.policy import Policy
@@ -40,8 +40,8 @@ class IQ_Learn_Policy(Policy):
         assert type(self._output_shape) == int, "Output shape needs to be an integer."
         assert 2 * self._half_out_shape == self._output_shape, "Output shape needs to be an even number."
 
-        self._delta_a = to_float_tensor(.5 * (max_a - min_a), self.use_cuda)
-        self._central_a = to_float_tensor(.5 * (max_a + min_a), self.use_cuda)
+        self._delta_a = TorchUtils.to_float_tensor(.5 * (max_a - min_a), self.use_cuda)
+        self._central_a = TorchUtils.to_float_tensor(.5 * (max_a + min_a), self.use_cuda)
 
         self._log_std_min = to_parameter(log_std_min)
         self._log_std_max = to_parameter(log_std_max)

@@ -1,7 +1,5 @@
-from torch.distributions import constraints
 from torch.distributions.transforms import PowerTransform
 from torch.distributions import TransformedDistribution, Gamma
-
 
 
 class InverseGamma(TransformedDistribution):

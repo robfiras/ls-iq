@@ -3,7 +3,7 @@ import numpy as np
 from .iq_sac import IQ_SAC
 import torch.nn.functional as F
 
-from mushroom_rl.utils.torch import to_float_tensor
+from mushroom_rl.utils.torch import TorchUtils
 
 
 class LSIQ(IQ_SAC):
@@ -33,7 +33,7 @@ class LSIQ(IQ_SAC):
     def _lossQ_iq_like(self, obs, act, next_obs, absorbing, is_expert):
 
         # 1st expert term of loss
-        gamma = to_float_tensor(self.mdp_info.gamma).cuda() if self._use_cuda else to_float_tensor(self.mdp_info.gamma)
+        gamma = TorchUtils.to_float_tensor(self.mdp_info.gamma).cuda() if self._use_cuda else TorchUtils.to_float_tensor(self.mdp_info.gamma)
         absorbing = torch.tensor(absorbing).cuda() if self._use_cuda else absorbing
         current_Q = self._critic_approximator(obs, act, output_tensor=True)
         if not self._use_target:
@@ -113,7 +113,7 @@ class LSIQ(IQ_SAC):
 
     def _lossQ_sqil_like(self, obs, act, next_obs, absorbing, is_expert):
         
-        gamma = to_float_tensor(self.mdp_info.gamma).cuda() if self._use_cuda else to_float_tensor(self.mdp_info.gamma)
+        gamma = TorchUtils.to_float_tensor(self.mdp_info.gamma).cuda() if self._use_cuda else to_float_tensor(self.mdp_info.gamma)
         absorbing = torch.tensor(absorbing).cuda() if self._use_cuda else absorbing
         current_Q = self._critic_approximator(obs, act, output_tensor=True)
         if not self._use_target:
