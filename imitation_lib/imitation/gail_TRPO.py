@@ -71,8 +71,6 @@ class GAIL(TRPO):
 
         self._use_next_state = use_next_states
 
-        self._epoch_counter = 1
-
         if sw:
             self._sw = sw
             setattr(self._sw, '__deepcopy__', lambda self: None) # dont need to be copyable, causes pickle error otherwise
@@ -83,11 +81,11 @@ class GAIL(TRPO):
         self.ext_normalizer = ext_normalizer
 
         self._add_save_attr(
-            discriminator_fit_params='pickle',
+            _discriminator_fit_params='pickle',
             _loss='torch',
             _train_n_th_epoch ='pickle',
             _D='mushroom',
-            _env_reward_frac='pickle',
+            _env_reward_frac='primitive',
             _demonstrations='pickle!',
             _act_mask='pickle',
             _state_mask='pickle',
@@ -96,6 +94,7 @@ class GAIL(TRPO):
             _trpo_standardizer='pickle',
             _D_standardizer='pickle',
             _train_D_n_th_epoch='pickle',
+            _n_epochs_discriminator="primitive",
             ext_normalizer='pickle',
         )
 
@@ -325,3 +324,6 @@ class GAIL(TRPO):
             d = self.discrim_output(state, action, apply_mask=apply_mask)
         plcy_prob = 1/(1 + np.exp(-d))     # sigmoid
         return np.squeeze(-np.log(1 - plcy_prob + 1e-8)).astype(np.float32)
+
+    def _post_load(self):
+        self._sw = None
